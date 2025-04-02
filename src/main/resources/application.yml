@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 10  # HikariCP 설정 (필요에 따라 추가)
+  quartz:
+    job-store-type: jdbc  # 데이터베이스 기반의 작업 저장소 사용
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: MyScheduler  # 스케줄러 이름
+            instanceId: AUTO  # 자동 인스턴스 ID 생성
+        jobStore:
+          isClustered: false #클러스터 구성 유무
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX  # JDBC JobStore 클래스
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate  # JDBC 드라이버 델리게이트
+          tablePrefix: QRTZ_  # 테이블 접두사
+          dataSource: myDS  # 사용할 데이터 소스 명시 (기본 `DataSource`가 있어야 함)
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: 5 # Quartz의 스레드 풀 크기
+          threadPriority: 5
+          threadsInheritContextClassLoaderOfInitializingThread: true
+        datasource:
+          myDS:
+            url: jdbc:h2:mem:testdb
+            driver-class-name: org.h2.Driver
+            username: sa
+            password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
