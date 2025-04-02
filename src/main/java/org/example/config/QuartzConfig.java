@@ -1,6 +1,10 @@
 package org.example.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.config.listener.CustomJobListener;
+import org.example.config.listener.CustomSchedulerListener;
+import org.example.config.listener.CustomTriggerListener;
+import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
@@ -44,6 +48,12 @@ public class QuartzConfig {
     public Scheduler scheduler(SchedulerFactoryBean factory) throws SchedulerException {
         Scheduler scheduler = factory.getScheduler();
         scheduler.start();
+        ListenerManager listenerManager = scheduler.getListenerManager();
+
+        listenerManager.addJobListener(new CustomJobListener());
+        listenerManager.addTriggerListener(new CustomTriggerListener());
+        listenerManager.addSchedulerListener(new CustomSchedulerListener());
+
         return scheduler;
     }
 }

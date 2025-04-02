@@ -139,3 +139,29 @@ application.yml에 설정한 DB에 현재 등록된 Job 목록을 볼 수 있다
 |----------------------|---------|----------|-------------|------------------------------|------------|-----------------|---------------|-----------------|------------------------------------------|
 | schedulerFactoryBean | homeJob | group2   | null        | org.example.job.HomeJob      | TRUE       | FALSE           | FALSE         | FALSE           | 756d62657286ac951d0b94e08b02000078704091999a7800 |
 | schedulerFactoryBean | myJob   | group1   | null        | org.example.job.MyJob        | TRUE       | FALSE           | FALSE         | FALSE           | (empty)                                  |
+## Listener 설명
+Jog, Trigger, Scheduler 의 LifeCycle에 맞춰 실행할 비즈니스 로직이 있을 경우 Listener 클래스를 상속받아 처리할 수 있다.
+리스너의 실행 순서는 다음과 같다.
+1. 애플리케이션이 실행되면 등록된 Job 개수만큼 `SchedulerListener.jobScheduled()`가 실행된다,
+2. Job이 실행될 시간이 되면 `TriggerListener.triggerFired()`가 실행된다. 
+3. Job이 시작하기 전 `CustomJobListener.jobToBeExecuted()`가 실행된다. 
+4. Job이 끝나면 `CustomJobListener.jobWasExecuted()`가 실행된다. 
+5. Trigger가 끝나면 `TriggerListener.triggerComplete()`가 실행된다. 
+6. 애플리케이션이 종료되면 `SchedulerListener.schedulerShutdown()`가 실행된다.
+
+
+
+```declarative
+2025-04-02 16:46:06 INFO  o.e.c.l.CustomSchedulerListener - [group2.homeTrigger] SCHEDULE START
+2025-04-02 16:46:06 INFO  o.e.c.l.CustomSchedulerListener - [group1.myTrigger] SCHEDULE START
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomTriggerListener - [group2.homeTrigger] TRIGGER START
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomJobListener - [group2.homeJob] START JOB
+2025-04-02 16:46:06 INFO  org.example.job.HomeJob - [group2.homeJob] jobName : Dish wash , jobHourPerWeek : 4.55
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomJobListener - [group2.homeJob] END 
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomTriggerListener - [group2.homeTrigger] TRIGGER SUCCESS
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomTriggerListener - [group1.myTrigger] TRIGGER START
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomJobListener - [group1.myJob] START JOB
+2025-04-02 16:46:06 INFO  org.example.job.MyJob - [group1.myJob] jobName : Spring App Management , jobHourPerWeek : 40.0
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomJobListener - [group1.myJob] END 
+2025-04-02 16:46:06 INFO  o.e.c.listener.CustomTriggerListener - [group1.myTrigger] TRIGGER SUCCESS
+```
